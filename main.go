@@ -15,6 +15,9 @@ var cardsPath = "./cards/"
 func main() {
 
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	if botToken == "" {
+		log.Fatal("TELEGRAM_BOT_TOKEN не задан")
+	}
 
 	bot, err := tgbotapi.NewBotAPI(botToken)
 	if err != nil {
@@ -26,10 +29,7 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(u)
-	if err != nil {
-		log.Panic(err)
-	}
+	updates := bot.GetUpdatesChan(u) // Переместил переменную updates внутрь функции main
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -52,7 +52,7 @@ func main() {
 					continue
 				}
 
-				photo := tgbotapi.NewPhotoUpload(update.Message.Chat.ID, cardImage)
+				photo := tgbotapi.NewPhoto(update.Message.Chat.ID, tgbotapi.FilePath(cardImage))
 				photo.Caption = "Твоя метафорическая карта"
 
 				bot.Send(photo)
